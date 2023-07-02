@@ -1,0 +1,152 @@
+<!doctype html>
+<html lang="ko" xmlns="http://www.thymeleaf.org">
+<head>
+<meta charset="UTF-8">
+<title>방명록</title>
+<link
+	href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/css/bootstrap.min.css"
+	rel="stylesheet">
+<script
+	src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/js/bootstrap.bundle.min.js"></script>
+<script
+	src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.0/jquery.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+
+<style type="text/css">
+	table { width: 900px; border: none; margin: auto; padding: 5px;}
+	.title{ font-size: 18pt; text-align: center; font-weight: bold; padding: 5px; border: none;}
+	.info {text-align: right; border: none;padding: 5px;}
+	th {border: 1px solid #5882FA; padding:5px; text-align: center; background-color: #5882FA; color: white; }
+	td {border: 1px solid #5882FA; padding:5px; text-align: center; }
+	.btntr{padding: 10px;}
+</style>
+
+<script type="text/javascript">
+	$(function(){
+		$("#resetBtn").css('display','none'); // 처음에 취소버튼은 보이지 않는다.
+		$("#name").focus();
+		
+		// 폼 태그가 전송될때 유효성 검사를 수행한다.
+		$("#guestForm").submit(function() {
+			let value = $("#name").val();
+			if(value==null || value.trim().length==0){
+				alert('이름은 반드시 입력해야 합니다.');
+				$("#name").val("");
+				$("#name").focus();
+				return false;
+			}
+			value = $("#password").val();
+			if(value==null || value.trim().length==0){
+				alert('비번은 반드시 입력해야 합니다.');
+				$("#password").val("");
+				$("#password").focus();
+				return false;
+			}
+			value = $("#guest").val();
+			if(value==null || value.trim().length==0){
+				alert('내용은 반드시 입력해야 합니다.');
+				$("#guest").val("");
+				$("#guest").focus();
+				return false;
+			}
+			return true;
+		});
+	});
+	
+	// 수정버튼을 눌렀을때
+	function editForm(no, name, guest){
+		$("#resetBtn").css('display','inline'); // 취소 버튼을 보이게 한다.
+		$("#submitBtn").val("수정"); // 전송버튼의 이름을 수정으로 변경
+		$("#mode").val("update"); // 모드를 update으로 변경
+		$("#no").val(no); // 번호 넣고
+		$("#name").val(name); // 이름넣고
+		$("#name").prop("readonly", true); // 읽기 전용으로 만들고
+		$("#guest").val(guest); // 메모 넣고
+		$("#password").focus();// 비번에 커서
+	}
+	// 삭제 버튼을 눌렀을때
+	function deleteForm(no, name, guest){
+		$("#resetBtn").css('display','inline'); // 취소 버튼을 보이게 한다.
+		$("#submitBtn").val("삭제"); // 전송버튼의 이름을 삭제으로 변경
+		$("#mode").val("delete"); // 모드를 delete으로 변경
+		$("#no").val(no); // 번호 넣고
+		$("#name").val(name); // 이름넣고
+		$("#name").prop("readonly", true); // 읽기 전용으로 만들고
+		$("#guest").val(guest); // 메모 넣고
+		$("#guest").prop("readonly", true); // 읽기 전용으로 만들고
+		$("#password").focus();// 비번에 커서
+	}
+	// 취소 버튼을 눌렀을때
+	function resetForm(){
+		$("#resetBtn").css('display','none'); // 취소 버튼을 보이지 않게 한다.
+		$("#submitBtn").val("저장"); // 전송버튼의 이름을 저장으로 변경
+		$("#mode").val("insert"); // 모드를 delete으로 변경
+		$("#no").val("0"); // 번호 넣고
+		$("#name").val(""); // 이름 지우고
+		$("#name").prop("readonly", false); // 읽기 전용 해제
+		$("#guest").val(""); // 메모 지우고
+		$("#guest").prop("readonly", false); // 읽기 전용 해제
+		$("#name").focus();// 이름에 커서
+	}
+</script>
+</head>
+<body>
+	<table>
+		<tr>
+			<td colspan="5" class="title" style="color: #5882FA">GUEST_BOOK</td>
+		</tr>
+		<tr>
+			<td colspan="5" class="info">[[${pv.pageInfo }]]</td>
+		</tr>
+		<tr>
+			<th>번호</th>
+			<th>작성자</th>
+			<th width="50%">내용</th>
+			<th>작성일</th>
+			<th>IP</th>
+		</tr>
+		<th:block th:if="${pv.totalCount>0}">
+			<tr th:each="vo:${pv.list }">
+				<td style="text-align: right;">[[${vo.idx }]]</td>
+				<td>[[${vo.name }]] </td>
+				<td style="text-align: left;">
+					[[${vo.content }]]
+					<button class="btn btn-outline-primary" th:onclick="editForm([[${vo.idx }]],[[${vo.name }]],[[${vo.content }]]);"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-wrench-adjustable" viewBox="0 0 16 16">
+  <path d="M16 4.5a4.492 4.492 0 0 1-1.703 3.526L13 5l2.959-1.11c.027.2.041.403.041.61Z"/>
+  <path d="M11.5 9c.653 0 1.273-.139 1.833-.39L12 5.5 11 3l3.826-1.53A4.5 4.5 0 0 0 7.29 6.092l-6.116 5.096a2.583 2.583 0 1 0 3.638 3.638L9.908 8.71A4.49 4.49 0 0 0 11.5 9Zm-1.292-4.361-.596.893.809-.27a.25.25 0 0 1 .287.377l-.596.893.809-.27.158.475-1.5.5a.25.25 0 0 1-.287-.376l.596-.893-.809.27a.25.25 0 0 1-.287-.377l.596-.893-.809.27-.158-.475 1.5-.5a.25.25 0 0 1 .287.376ZM3 14a1 1 0 1 1 0-2 1 1 0 0 1 0 2Z"/>
+</svg> Edit</button>
+					<button class="btn btn-outline-primary" th:onclick="deleteForm([[${vo.idx }]],[[${vo.name }]],[[${vo.content }]]);"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-trash3-fill" viewBox="0 0 16 16">
+  <path d="M11 1.5v1h3.5a.5.5 0 0 1 0 1h-.538l-.853 10.66A2 2 0 0 1 11.115 16h-6.23a2 2 0 0 1-1.994-1.84L2.038 3.5H1.5a.5.5 0 0 1 0-1H5v-1A1.5 1.5 0 0 1 6.5 0h3A1.5 1.5 0 0 1 11 1.5Zm-5 0v1h4v-1a.5.5 0 0 0-.5-.5h-3a.5.5 0 0 0-.5.5ZM4.5 5.029l.5 8.5a.5.5 0 1 0 .998-.06l-.5-8.5a.5.5 0 1 0-.998.06Zm6.53-.528a.5.5 0 0 0-.528.47l-.5 8.5a.5.5 0 0 0 .998.058l.5-8.5a.5.5 0 0 0-.47-.528ZM8 4.5a.5.5 0 0 0-.5.5v8.5a.5.5 0 0 0 1 0V5a.5.5 0 0 0-.5-.5Z"/>
+</svg> Delete</button>
+				</td>
+				<td>[[${#dates.format(vo.regDate, 'yyyy-MM-dd HH:mm:ss')}]] </td>
+				<td>[[${vo.ip }]]</td>
+			</tr>
+		</th:block>
+		<tr th:if="${pv.totalCount<=0}">
+			<td colspan="5" style="text-align: center;">등록된 글이 없습니다.</td>
+		</tr>
+		<tr>
+		<td colspan="5">
+			<a href="">[(${pv.pageList})]</a></td>
+		</tr>
+		<tr id="btntr" style="border: 2px solid #5882FA;">
+			<td colspan="5" style="border: none;text-align: left; ">
+				<form action="insertOk" method="post" id="guestForm">
+					<input type="hidden" name="idx" id="no" value="0" />
+					<input type="hidden" name="p" id="p" th:value="${cv.currentPage }" />
+					<input type="hidden" name="s" id="s" th:value="${cv.sizeOfPage }" />
+					<input type="hidden" name="b" id="b" th:value="${cv.sizeOfBlock }" />
+					<input type="hidden" name="mode" id="mode" value="insert" />
+					<input style="border:1px solid #5882FA;" type="text" name="name" id="name" placeholder="이름입력" required="required"/>
+					<input style="border:1px solid #5882FA;"  type="password" name="password" id="password" placeholder="비번입력" required="required"/>
+					<br />
+					<input style="border:1px solid #5882FA;"  type="text" name="content" id="guest" placeholder="내용입력" required="required" size="100"/>
+					<input type="submit" value="저장" id="submitBtn" class="btn btn-outline-primary">
+					<input type="button" value="취소" id="resetBtn" onclick="resetForm();" class="btn btn-sm btn-outline-success">
+				</form>
+			</td>
+		</tr>
+	</table>
+</body>
+</html>	
